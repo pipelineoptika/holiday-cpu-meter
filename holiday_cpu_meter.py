@@ -41,7 +41,7 @@ def my_render():
 		else:
 			green.append(led_off)
 
-	# …and from the other for CPU 2
+	# ...and from the other for CPU 2
 	for i in reversed(range(globes)):
 		if i < bluecount:
 			blue.append(led_on)
