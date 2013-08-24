@@ -11,55 +11,55 @@ import holiday
 #import psutil
 import time
 import random
+import sys
 
 # Change "localhost:8080" to the address of your target Holiday
 hol = holiday.Holiday(remote=True,addr="localhost:8080")
 
 globes = hol.NUM_GLOBES
+# How many globes need to be illuminated to represent the cpu usage?
+# We need to determine this based on the CPU count, which we'll fake for now
+cpucount = 4
+globesperfragment = globes/cpucount
 cpus = []
+
+#print "globesperfragment: %d" % globesperfragment
 
 # Rendering for the Holiday
 def my_render():
-	global globes, cpus
+	global globes, globesperfragment, cpus, cpucount
 
 	# Define some not-so-extreme values for "on"
-	led_on = 0x90
+	led_on = 0xFF
 	led_off = 0x00
-
-	# How many globes need to be illuminated to represent the cpu usage?
-	greencount = (cpus[0]*globes)/100
-	bluecount = (cpus[1]*globes)/100
-
+	
 	green = []
 	blue = []
 	red = []
-
-	# Fill the arrays of colours
-	# From one end for CPU 1
-	for i in range(globes):
-		if i < greencount:
-			green.append(led_on)
-		else:
-			green.append(led_off)
-
-	# ...and from the other for CPU 2
-	for i in reversed(range(globes)):
-		if i < bluecount:
-			blue.append(led_on)
-		else:
-			blue.append(led_off)
-
-	# Any usage globes that overlap will be coloured red
-	for i in range(globes):
-		if green[i] == led_on and blue[i] == led_on:
-			green[i] = led_off
-			blue[i] = led_off
-			red.append(led_on)
-		else:
-			red.append(led_off)
+	
+	for i in range(cpucount):
+		#print "eval cpu %d" % i
+		greencount = (cpus[i]*globesperfragment)/100
+		
+		#print "greencount: %d" % i
+		
+		# Fill the arrays of colours
+		for j in range(globesperfragment):
+			if j < greencount:
+				if j >= globesperfragment - ((globesperfragment*25)/100):
+					red.append(led_on)
+					green.append(led_off)
+				else:
+					red.append(led_off)
+					green.append(led_on)
+				blue.append(led_off)
+			else:
+				green.append(led_off)
+				blue.append(led_off)
+				red.append(led_off)
 
 	# Set the globe values and render
-	for i in range(globes):
+	for i in range(globesperfragment*cpucount):
 		hol.setglobe(i, red[i], green[i], blue[i])
 	hol.render()
 
@@ -71,6 +71,8 @@ def fetch_cpu_vals():
 	
 	cpus = []
 		
+	cpus.append(generator.randint(0, 100))
+	cpus.append(generator.randint(0, 100))
 	cpus.append(generator.randint(0, 100))
 	cpus.append(generator.randint(0, 100))
 	#cpus = psutil.cpu_percent(interval=0.2, percpu=True)
