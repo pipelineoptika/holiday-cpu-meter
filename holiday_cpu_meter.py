@@ -8,8 +8,9 @@
 #	https://github.com/moorescloud/tugofwar
 
 import holiday
-import psutil
+#import psutil
 import time
+import random
 
 # Change "localhost:8080" to the address of your target Holiday
 hol = holiday.Holiday(remote=True,addr="localhost:8080")
@@ -65,10 +66,18 @@ def my_render():
 # Get the CPU use values from psutil
 def fetch_cpu_vals():
 	global cpus
-	cpus = psutil.cpu_percent(interval=0.2, percpu=True)
+	
+	generator = random.Random()
+	
+	cpus = []
+		
+	cpus.append(generator.randint(0, 100))
+	cpus.append(generator.randint(0, 100))
+	#cpus = psutil.cpu_percent(interval=0.2, percpu=True)
 
 # Main loop
 while True:
 	fetch_cpu_vals()
+	time.sleep(0.5)
 	my_render()
 	
