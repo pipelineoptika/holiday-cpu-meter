@@ -1,13 +1,14 @@
-# A simple CPU meter for dual-core machines, for display on the Holiday IoTAS device.
-# Support for more than two cores is left as an exercise for the reader. :)
+# A simple CPU meter, for display on the Holiday IoTAS device.
+# It uses the Holiday SecretAPI to push new values via UDP. It pushes these as often as it can.
+# The fetch interval is defined in fetch_cpu_vals.
 #
 # You'll need psutil:
 # 	easy_install psutil
 # 
-# And holiday, which is available in:
-#	https://github.com/moorescloud/tugofwar
+# Included is holidaysecretapi. You can get the latest version of this library from:
+#	https://github.com/moorescloud/secretapi
 
-from holidaysecretapi import HolidaySecretAPI 
+from holidaysecretapi import HolidaySecretAPI
 import psutil
 import time
 import random
@@ -27,8 +28,8 @@ class HCMapp(threading.Thread):
 			cpus = self.fetch_cpu_vals()
 			self.my_render(cpus)
 
-	# Rendering for the Holiday
 	def my_render(self, cpus):
+		""" Renders a list of CPU usage values to the Holiday """
 		led_on = 0xFF
 		led_off = 0x00
 
@@ -64,18 +65,18 @@ class HCMapp(threading.Thread):
 			self.hol.setglobe(globeindex, red[globeindex], green[globeindex], blue[globeindex])
 		self.hol.render()
 
-	# Get the CPU use values from psutil
 	def fetch_cpu_vals(self):
+		""" Get the CPU use values from psutil """
 		return psutil.cpu_percent(interval=0.075, percpu=True)
 
 # Main loop
 if __name__ == '__main__':
 	if len(sys.argv) > 1:
-		holiday_address = sys.argv[1]          # Pass IP address of Holiday on command line
+		holiday_address = sys.argv[1]		# Pass IP address of Holiday on command line
 	else:
-		sys.exit(1)                 # If not there, fail
+		sys.exit(1)                				# If not there, fail
 	
-	app = HCMapp()               # Instance thread & start it
+	app = HCMapp()						# Instance thread & start it
 	app.start()
 	
 	while True:
