@@ -39,16 +39,26 @@ class HCMapp(threading.Thread):
 		blue = []
 		red = []
 		
-		cpucount = len(cpus)
-		globesperfragment = globes/cpucount
-		
-		for cpu in range(cpucount):
-			greencount = (cpus[cpu] * globesperfragment) / 100
+		cpu_count = len(cpus)
+		globes_per_fragment_base = globes // cpu_count
+		remainder = globes % cpu_count
+		stride = cpu_count // remainder
+		fragment_counts = []
+
+		for cpu in range(cpu_count):
+			if (cpu % stride == 0):
+				fragment_counts.append(globes_per_fragment_base + 1)
+			else:
+				fragment_counts.append(globes_per_fragment_base)
+			
+		for cpu in range(cpu_count):
+			fragment_count = fragment_counts[cpu]
+			greencount = (cpus[cpu] * fragment_count) / 100
 			
 			# Fill the arrays of colours
-			for globe in range(globesperfragment):
+			for globe in range(fragment_count):
 				if globe < greencount:
-					if globe >= globesperfragment - ((globesperfragment * 25) / 100):
+					if globe >= fragment_count - ((fragment_count * 25) / 100):
 						red.append(led_on)
 						green.append(led_off)
 					else:
@@ -61,7 +71,7 @@ class HCMapp(threading.Thread):
 					red.append(led_off)
 
 		# Set the globe values and render
-		for globeindex in range(globesperfragment*cpucount):
+		for globeindex in range(globes):
 			self.hol.setglobe(globeindex, red[globeindex], green[globeindex], blue[globeindex])
 		self.hol.render()
 
