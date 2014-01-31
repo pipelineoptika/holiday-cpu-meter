@@ -24,9 +24,15 @@ class HCMapp(threading.Thread):
 
 		while True:
 			if self.terminate:
+				self.reset_globes()
 				return
 			cpus = self.fetch_cpu_vals()
 			self.my_render(cpus)
+
+	def reset_globes(self):
+		for globeindex in range(self.hol.NUM_GLOBES):
+			self.hol.setglobe(globeindex, 0x00, 0x00, 0x00)
+		self.hol.render()
 
 	def my_render(self, cpus):
 		""" Renders a list of CPU usage values to the Holiday """
